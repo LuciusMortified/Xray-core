@@ -6,7 +6,8 @@ Forked version with some improvements. More info in original [repo](https://gith
 
 ### Limit device count per client using local policy.
 
-```json lines
+Config example:
+```yaml
 {
   // ...
   "inbounds": [
