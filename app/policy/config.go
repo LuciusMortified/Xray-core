@@ -27,6 +27,7 @@ func defaultPolicy() *Policy {
 		Buffer: &Policy_Buffer{
 			Connection: p.Buffer.PerConnection,
 		},
+		DeviceCount: 0,
 	}
 }
 
@@ -58,6 +59,7 @@ func (p *Policy) overrideWith(another *Policy) {
 			Connection: another.Buffer.Connection,
 		}
 	}
+	p.DeviceCount = another.DeviceCount
 }
 
 // ToCorePolicy converts this Policy to policy.Session.
@@ -78,6 +80,8 @@ func (p *Policy) ToCorePolicy() policy.Session {
 	if p.Buffer != nil {
 		cp.Buffer.PerConnection = p.Buffer.Connection
 	}
+	cp.DeviceCount = p.DeviceCount
+
 	return cp
 }
 

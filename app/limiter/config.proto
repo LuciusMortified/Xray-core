@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package xray.app.limiter;
+option csharp_namespace = "Xray.App.Limiter";
+option go_package = "github.com/luciusmortified/xray-core/app/limiter";
+option java_package = "com.xray.app.limiter";
+option java_multiple_files = true;
+
+message Config {}

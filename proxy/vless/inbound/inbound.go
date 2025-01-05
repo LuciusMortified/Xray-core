@@ -23,7 +23,8 @@ import (
 	"github.com/xtls/xray-core/common/task"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/features/dns"
-	feature_inbound "github.com/xtls/xray-core/features/inbound"
+	featureinbound "github.com/xtls/xray-core/features/inbound"
+	"github.com/xtls/xray-core/features/limiter"
 	"github.com/xtls/xray-core/features/policy"
 	"github.com/xtls/xray-core/features/routing"
 	"github.com/xtls/xray-core/proxy"
@@ -63,8 +64,9 @@ func init() {
 
 // Handler is an inbound connection handler that handles messages in VLess protocol.
 type Handler struct {
-	inboundHandlerManager feature_inbound.Manager
+	inboundHandlerManager featureinbound.Manager
 	policyManager         policy.Manager
+	limiterManager        limiter.Manager
 	validator             vless.Validator
 	dns                   dns.Client
 	fallbacks             map[string]map[string]map[string]*Fallback // or nil
@@ -75,8 +77,9 @@ type Handler struct {
 func New(ctx context.Context, config *Config, dc dns.Client, validator vless.Validator) (*Handler, error) {
 	v := core.MustFromContext(ctx)
 	handler := &Handler{
-		inboundHandlerManager: v.GetFeature(feature_inbound.ManagerType()).(feature_inbound.Manager),
+		inboundHandlerManager: v.GetFeature(featureinbound.ManagerType()).(featureinbound.Manager),
 		policyManager:         v.GetFeature(policy.ManagerType()).(policy.Manager),
+		limiterManager:        v.GetFeature(limiter.ManagerType()).(limiter.Manager),
 		dns:                   dc,
 		validator:             validator,
 	}
@@ -523,6 +526,10 @@ func (h *Handler) Process(ctx context.Context, network net.Network, connection s
 	link, err := dispatcher.Dispatch(ctx, request.Destination())
 	if err != nil {
 		return errors.New("failed to dispatch request to ", request.Destination()).Base(err).AtWarning()
+	}
+
+	if err = limiter.CheckLimits(ctx, h.limiterManager); err != nil {
+		return err
 	}
 
 	serverReader := link.Reader // .(*pipe.Reader)

@@ -19,7 +19,7 @@ import (
 	"github.com/xtls/xray-core/features/outbound"
 	"github.com/xtls/xray-core/features/policy"
 	"github.com/xtls/xray-core/features/routing"
-	routing_session "github.com/xtls/xray-core/features/routing/session"
+	routingsession "github.com/xtls/xray-core/features/routing/session"
 	"github.com/xtls/xray-core/features/stats"
 	"github.com/xtls/xray-core/transport"
 	"github.com/xtls/xray-core/transport/pipe"
@@ -185,12 +185,11 @@ func (d *DefaultDispatcher) getLink(ctx context.Context) (*transport.Link, *tran
 		if p.Stats.UserOnline {
 			name := "user>>>" + user.Email + ">>>online"
 			if om, _ := stats.GetOrRegisterOnlineMap(d.stats, name); om != nil {
-				sessionInbounds := session.InboundFromContext(ctx)
-				userIP := sessionInbounds.Source.Address.String()
+				userIP := sessionInbound.Source.Address.String()
 				om.AddIP(userIP)
+
 				// log Online user with ips
 				// errors.LogDebug(ctx, "user>>>" + user.Email + ">>>online", om.Count(), om.List())
-
 			}
 		}
 	}
@@ -417,7 +416,7 @@ func (d *DefaultDispatcher) routedDispatch(ctx context.Context, link *transport.
 
 	var handler outbound.Handler
 
-	routingLink := routing_session.AsRoutingContext(ctx)
+	routingLink := routingsession.AsRoutingContext(ctx)
 	inTag := routingLink.GetInboundTag()
 	isPickRoute := 0
 	if forcedOutboundTag := session.GetForcedOutboundTagFromContext(ctx); forcedOutboundTag != "" {

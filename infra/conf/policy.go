@@ -13,6 +13,7 @@ type Policy struct {
 	StatsUserDownlink bool    `json:"statsUserDownlink"`
 	StatsUserOnline   bool    `json:"statsUserOnline"`
 	BufferSize        *int32  `json:"bufferSize"`
+	DeviceCount       *int32  `json:"deviceCount"`
 }
 
 func (t *Policy) Build() (*policy.Policy, error) {
@@ -47,6 +48,10 @@ func (t *Policy) Build() (*policy.Policy, error) {
 		p.Buffer = &policy.Policy_Buffer{
 			Connection: bs,
 		}
+	}
+
+	if t.DeviceCount != nil {
+		p.DeviceCount = *t.DeviceCount
 	}
 
 	return p, nil

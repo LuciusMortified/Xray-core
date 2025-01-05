@@ -4,7 +4,39 @@ Forked version with some improvements. More info in original [repo](https://gith
 
 ## Improvements
 
-- Limit connections count per client using policy. **WIP**
+### Limit device count per client using local policy.
+
+```json lines
+{
+  // ...
+  "inbounds": [
+    {
+      // ...
+      "settings": {
+        // ...
+        "clients": [
+          {
+            "id": "Your UUID",
+            "email": "test@example.com", // <- required for stats
+            "level": 0,
+          }
+        ]
+      }
+    }
+  ],
+  // ...
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserOnline": true, // <- required for device limitation
+        "deviceCount": 1 // 0 or less for unlimited device count
+      }
+    }
+  },
+  "stats": {}, // <- required for enable stats
+  "limiter": {} // <- required for enable limits
+}
+```
 
 ## Donation
 

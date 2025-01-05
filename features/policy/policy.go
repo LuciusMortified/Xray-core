@@ -57,9 +57,10 @@ type System struct {
 
 // Session is session based settings for controlling Xray requests. It contains various settings (or limits) that may differ for different users in the context.
 type Session struct {
-	Timeouts Timeout // Timeout settings
-	Stats    Stats
-	Buffer   Buffer
+	Timeouts    Timeout // Timeout settings
+	Stats       Stats
+	Buffer      Buffer
+	DeviceCount int32
 }
 
 // Manager is a feature that provides Policy for the given user by its id or level.
@@ -127,7 +128,8 @@ func SessionDefault() Session {
 			UserDownlink: false,
 			UserOnline:   false,
 		},
-		Buffer: defaultBufferPolicy(),
+		Buffer:      defaultBufferPolicy(),
+		DeviceCount: 0,
 	}
 }
 

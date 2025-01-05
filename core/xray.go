@@ -13,6 +13,7 @@ import (
 	"github.com/xtls/xray-core/features/dns"
 	"github.com/xtls/xray-core/features/dns/localdns"
 	"github.com/xtls/xray-core/features/inbound"
+	"github.com/xtls/xray-core/features/limiter"
 	"github.com/xtls/xray-core/features/outbound"
 	"github.com/xtls/xray-core/features/policy"
 	"github.com/xtls/xray-core/features/routing"
@@ -209,6 +210,7 @@ func initInstanceWithConfig(config *Config, server *Instance) (bool, error) {
 		{policy.ManagerType(), policy.DefaultManager{}},
 		{routing.RouterType(), routing.DefaultRouter{}},
 		{stats.ManagerType(), stats.NoopManager{}},
+		{limiter.ManagerType(), limiter.NoopManager{}},
 	}
 
 	for _, f := range essentialFeatures {
@@ -359,7 +361,7 @@ func (s *Instance) AddFeature(feature features.Feature) error {
 	}
 	s.pendingOptionalResolutions = pendingOptional
 	s.resolveLock.Unlock()
-	
+
 	var err error
 	for _, r := range availableResolution {
 		err = r.callbackResolution(s.features) // only return the last error for now

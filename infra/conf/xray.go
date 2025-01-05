@@ -10,12 +10,13 @@ import (
 	"strings"
 
 	"github.com/xtls/xray-core/app/dispatcher"
+	"github.com/xtls/xray-core/app/limiter"
 	"github.com/xtls/xray-core/app/proxyman"
 	"github.com/xtls/xray-core/app/stats"
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/serial"
-	core "github.com/xtls/xray-core/core"
+	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/transport/internet"
 )
 
@@ -361,6 +362,11 @@ func (c *StatsConfig) Build() (*stats.Config, error) {
 	return &stats.Config{}, nil
 }
 
+type LimiterConfig struct{}
+
+// Build implements Buildable.
+func (c *LimiterConfig) Build() (*limiter.Config, error) { return &limiter.Config{}, nil }
+
 type Config struct {
 	// Deprecated: Global transport config is no longer used
 	// left for returning error
@@ -379,6 +385,7 @@ type Config struct {
 	FakeDNS          *FakeDNSConfig          `json:"fakeDns"`
 	Observatory      *ObservatoryConfig      `json:"observatory"`
 	BurstObservatory *BurstObservatoryConfig `json:"burstObservatory"`
+	Limiter          *LimiterConfig          `json:"limiter"`
 }
 
 func (c *Config) findInboundTag(tag string) int {
@@ -445,6 +452,10 @@ func (c *Config) Override(o *Config, fn string) {
 
 	if o.BurstObservatory != nil {
 		c.BurstObservatory = o.BurstObservatory
+	}
+
+	if o.Limiter != nil {
+		c.Limiter = o.Limiter
 	}
 
 	// update the Inbound in slice if the only one in override config has same tag
@@ -581,6 +592,14 @@ func (c *Config) Build() (*core.Config, error) {
 
 	if c.BurstObservatory != nil {
 		r, err := c.BurstObservatory.Build()
+		if err != nil {
+			return nil, err
+		}
+		config.App = append(config.App, serial.ToTypedMessage(r))
+	}
+
+	if c.Limiter != nil {
+		r, err := c.Limiter.Build()
 		if err != nil {
 			return nil, err
 		}
