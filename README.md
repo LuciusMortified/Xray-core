@@ -4,7 +4,7 @@ Forked version with some improvements. More info in original [repo](https://gith
 
 ## Improvements
 
-### Limit device count per client using local policy.
+### Limit device count per client using local policy. (Only VLESS)
 
 Config example:
 ```yaml
